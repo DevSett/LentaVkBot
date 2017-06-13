@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.dialect">com.enigmabridge.hibernate.dialect.SQLiteDialect</property>
+        <property name="connection.url">jdbc:sqlite:lentaDB</property>
+        <property name="connection.driver_class">org.sqlite.JDBC</property>
+        <mapping class="org.model.DomainsEntity"/>
+        <mapping class="org.model.UsersEntity"/>
+        <!--<property name="hbm2ddl.auto">create</property>-->
+
+        <!-- <property name="connection.username"/> -->
+        <!-- <property name="connection.password"/> -->
+
+        <!-- DB schema will be updated if needed -->
+    </session-factory>
+</hibernate-configuration>

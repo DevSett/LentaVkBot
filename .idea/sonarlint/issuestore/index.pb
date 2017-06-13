@@ -1,0 +1,3 @@
+
+C
+HibernateSQLite.iml,1/2/1293e0bb8439bd16223e6230d059339da9ff2f02
