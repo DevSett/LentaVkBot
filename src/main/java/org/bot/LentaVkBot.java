@@ -224,7 +224,6 @@ public class LentaVkBot extends TelegramLongPollingBot {
             if (chatId.equals(lentaches.get(i).getChatId()) &&
                     domain.equals(lentaches.get(i).getDomain())) {
                 check = false;
-                lentaches.get(i).start();
             }
         }
         if (check) {
@@ -236,7 +235,6 @@ public class LentaVkBot extends TelegramLongPollingBot {
                 serviceSingelton.create(domainsEntity);
             }
             lentaches.add(new Lentach(chatId, domain, this));
-            lentaches.get(lentaches.size() - 1).start();
         }
     }
 }

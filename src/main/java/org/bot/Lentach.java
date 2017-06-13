@@ -30,7 +30,7 @@ import static org.MainApp.*;
  * Created by killsett on 09.06.17.
  */
 
-public class Lentach {
+public class Lentach implements Runnable {
     private Logger logger = Logger.getLogger(Lentach.class);
     private static final String[] TEXTPOST = {"❕ ", ", ", "\n"};
     private String chatId;
@@ -49,6 +49,7 @@ public class Lentach {
         this.domain = domain;
         this.lentaVkBot = lentaVkBot;
         init();
+        new Thread(this).start();
     }
 
     private void init() {
@@ -79,37 +80,68 @@ public class Lentach {
         check = false;
     }
 
-    public void start() {
+    @Override
+    public void run() {
         check = true;
         lastMessage();
-        Thread threadVkLenta = new Thread(() -> {
-            List<WallpostFull> posts = null;
-            while (check) {
-                try {
-                    posts = new Wall(vkApiClient).get(serviceActor).domain(domain).execute().getItems();
-                    for (int index = 0; posts.size() > index; index++) {
-                        if (lastId < posts.get(index).getId()) {
-                            send(posts.get(index));
-                        }
+        List<WallpostFull> posts = null;
+        while (check) {
+            try {
+                posts = new Wall(vkApiClient).get(serviceActor).domain(domain).execute().getItems();
+                 for (int index = 0; posts.size() > index; index++) {
+                    if (lastId < posts.get(index).getId()) {
+                        send(posts.get(index));
                     }
-                    lastId = Math.max(lastId, Math.max(posts.get(0).getId(), posts.get(1).getId()));
-                    Thread.sleep(2000);
-                } catch (ClientException | InterruptedException e) {
-                    logger.error("start: cl and int", e);
-                    e.printStackTrace();
-                } catch (ApiException e) {
-                    logger.error("start: api", e);
-                    e.printStackTrace();
-                    if (e.getCode() == 100) {
-                        check = false;
-                        lentaVkBot.sendMsg(chatId, "Неправильно введен домен группы!");
-                    }
-                    break;
                 }
+                lastId = Math.max(lastId, Math.max(posts.get(0).getId(), posts.get(1).getId()));
+                Thread.sleep(2000);
+
+            } catch (ClientException | InterruptedException e) {
+                logger.error("start: cl and int", e);
+                e.printStackTrace();
+            } catch (ApiException e) {
+                logger.error("start: api", e);
+                e.printStackTrace();
+                if (e.getCode() == 100) {
+                    check = false;
+                    lentaVkBot.sendMsg(chatId, "Неправильно введен домен группы!");
+                }
+                break;
             }
-        });
-        threadVkLenta.start();
+        }
     }
+
+//    public void start() {
+//        check = true;
+//        lastMessage();
+//        Thread threadVkLenta = new Thread(() -> {
+//            List<WallpostFull> posts = null;
+//            while (check) {
+//                try {
+//                    posts = new Wall(vkApiClient).get(serviceActor).domain(domain).execute().getItems();
+//                    for (int index = 0; posts.size() > index; index++) {
+//                        if (lastId < posts.get(index).getId()) {
+//                            send(posts.get(index));
+//                        }
+//                    }
+//                    lastId = Math.max(lastId, Math.max(posts.get(0).getId(), posts.get(1).getId()));
+//                    Thread.sleep(2000);
+//                } catch (ClientException | InterruptedException e) {
+//                    logger.error("start: cl and int", e);
+//                    e.printStackTrace();
+//                } catch (ApiException e) {
+//                    logger.error("start: api", e);
+//                    e.printStackTrace();
+//                    if (e.getCode() == 100) {
+//                        check = false;
+//                        lentaVkBot.sendMsg(chatId, "Неправильно введен домен группы!");
+//                    }
+//                    break;
+//                }
+//            }
+//        });
+//        threadVkLenta.start();
+//    }
 
     private void send(WallpostFull wallpostFull) {
         String message = convertToMessage(wallpostFull.getDate(), wallpostFull.getText());
@@ -195,17 +227,19 @@ public class Lentach {
     }
 
     private String convertToMessage(Integer dateUnix, String text) {
-        Date date = new Date((long)dateUnix * 1000);
+        Date date = new Date((long) dateUnix * 1000);
         Date dateNatured = new Date();
         boolean check = false;
         if (
                 dateNatured.getYear() == date.getYear() &&
-                dateNatured.getMonth() == date.getMonth() &&
-                dateNatured.getDay() == date.getDay()
+                        dateNatured.getMonth() == date.getMonth() &&
+                        dateNatured.getDay() == date.getDay()
                 )
             check = true;
         return check ?
-                TEXTPOST[0] + nameGroup + TEXTPOST[1] + dateFormatSmall.format(date) + TEXTPOST[2] + text:
-                TEXTPOST[0] +nameGroup + TEXTPOST[1] + dateFormatFull.format(date)+ TEXTPOST[2] + text;
+                TEXTPOST[0] + nameGroup + TEXTPOST[1] + dateFormatSmall.format(date) + TEXTPOST[2] + text :
+                TEXTPOST[0] + nameGroup + TEXTPOST[1] + dateFormatFull.format(date) + TEXTPOST[2] + text;
     }
+
+
 }
